@@ -21,7 +21,7 @@ elif [ "$1" = "install" -a "$2" = "katas" ]; then
     INSTALL_KATAS=1
 fi
 
-if [ INSTALL_KATAS = 1 ]; then
+if [ "$INSTALL_KATAS" = 1 ]; then
     if [ -x "${katas_bin_path}" ]; then
         exit 0
     else
