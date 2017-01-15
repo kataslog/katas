@@ -81,7 +81,7 @@ function setup() {
 
     str=""
     for s in $in_bashrc $in_profile $in_bash_profile $in_zshrc $in_zsh_profile ; do
-        [[ -z $str ]] && $str="$s" && str="${str}, $s"
+        [[ -z "$str" ]] && str="$s" && str="${str}, $s"
     done
     if [ -z "$str" ] ; then
         echo "    Katas source line not found in ~/.bashrc, ~/.bash_profile, ~/.profile, ~/.zshrc, or ~/.zsh_profile"
