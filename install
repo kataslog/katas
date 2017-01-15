@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 
 \curl -sSL https://raw.githubusercontent.com/kataslog/katas/master/katas.sh | bash -s install_katas
 
