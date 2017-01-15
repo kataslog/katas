@@ -5,7 +5,7 @@
         "description": "Improve your skills with regex dark magic"
     },
     {
-        "name" : "elixir"
+        "name" : "elixir",
         "url" : "https://github.com/kataslog/katas-elixir",
         "description": "Do you wanna make some potions?"
     }
