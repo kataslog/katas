@@ -1,5 +1,5 @@
 #/usr/bin/env bash
 
-\curl -sSL https://raw.githubusercontent.com/kataslog/katas/master/katas | bash -s install_katas
+\curl -sSL https://raw.githubusercontent.com/kataslog/katas/master/install | bash -s install_katas
 
 exit 0
