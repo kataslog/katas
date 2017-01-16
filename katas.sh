@@ -4,12 +4,16 @@ KATAS_HOME="$HOME/.katas"
 KATAS_DIR="$HOME/katas"
 KATAS_SCRIPTS_PATH="$KATAS_HOME/scripts"
 
+KATAS_ROOT_URL="https://raw.githubusercontent.com/kataslog/katas/master"
+
 system_path="$HOME/.katas"
 katas_bin_path="${system_path}/bin/katas"
 mentors_path="${system_path}/mentor"
 scripts_path="${system_path}/scripts"
 
 dojo_script="${scripts_path}/dojo.py"
+sensei_script="${scripts_path}/sensei.py"
+watchman_script="${scripts_path/watchman.py}"
 
 base_path="$HOME/katas"
 dojo_path="${base_path}/dojo"
@@ -26,7 +30,7 @@ if [ "$INSTALL_KATAS" = 1 ]; then
         exit 0
     else
         mkdir -p "${system_path}/bin"
-        \curl -sSL -o "$katas_bin_path" https://raw.githubusercontent.com/kataslog/katas/master/katas.sh
+        \curl -sSL -o "$katas_bin_path" "$KATAS_ROOT_URL/katas.sh"
         chmod +x "${katas_bin_path}"
 
         echo "Running initial setup"
@@ -115,7 +119,9 @@ function setup() {
 
     mkdir -p "$KATAS_HOME/"{bin,scripts,mentors}
 
-    \curl -sSL -o "$dojo_script" https://raw.githubusercontent.com/kataslog/katas/master/scripts/dojo.py
+    \curl -sSL -o "$dojo_script" "$KATAS_ROOT_URL/scripts/dojo.py"
+    \curl -sSL -o "$sensei_script" "$KATAS_ROOT_URL/scripts/sensei.py"
+    \curl -sSL -o "$watchman_script" "$KATAS_ROOT_URL/scripts/watchman.py"
 
     create_katas_env_scripts
 
@@ -135,11 +141,11 @@ function validate_install() {
 }
 
 function dojo_list() {
-    python "$dojo_script"
+    python "$dojo_script" "list_dojo" --all
 }
 
 function dojo_list_known() {
-    echo "dojo list of knowns"
+    python "$dojo_script" "list_dojo" --fetched
 }
 
 function dojo_katas_list() {
@@ -149,21 +155,25 @@ function dojo_katas_list() {
     sort="$4"
     difficulty="$5"
     echo "katas list ${dojo} ${filter} ${time} ${sort} ${difficulty}"
+    python "$dojo_script" "list_katas" -dojo="$dojo"
 }
 
 function dojo_use_default() {
     dojo="$1"
     echo "use as default ${dojo}"
+    python "$dojo_script" "use_default" -dojo="$dojo"
 }
 
 function dojo_fetch() {
     dojo="$1"
     echo "dojo fetch ${dojo}"
+    python "$watchman_script" "fetch_dojo" --dojo="$1"
 }
 
 function dojo_update() {
     dojo="$1"
     echo "dojo update ${dojo}"
+    python "$watchman_script" "update_dojo" --dojo="$1"
 }
 
 function dojo_hint() {
@@ -171,12 +181,14 @@ function dojo_hint() {
     kata="$2"
     all="$3"
     echo "hint ${dojo} ${kata} ${all}"
+    python "$sensei_script" "hint" --dojo="$dojo" --kata="$kata" --all
 }
 
 function dojo_test() {
     dojo="$1"
     kata="$2"
     echo "test ${dojo} ${kata}"
+    python "$sensei_script" "test" --dojo="$dojo" --kata="$kata"
 }
 
 function dojo_open() {
@@ -185,6 +197,7 @@ function dojo_open() {
     level="$3"
     random="$4"
     echo "open ${dojo} ${kata} ${level} ${random}"
+    python "$dojo_script" "open" --dojo="$dojo" --kata="$kata"
 }
 
 function clear() {
