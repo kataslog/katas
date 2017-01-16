@@ -1,35 +1,31 @@
 #!/usr/bin/python
-import sys, json, urllib
 
-def fetch_dojo_list():
-    dojo_url = "https://raw.githubusercontent.com/kataslog/katas/master/dojo.json"
-    return json.loads(urllib.urlopen(dojo_url).read())
+import sys, json
 
-def show_dojo_names():
-    dojo_list = fetch_dojo_list()
-    for (name, description) in map(lambda dojo: (dojo["name"], dojo["description"]), dojo_list):
-        print "%s - %s" % (name, description)
-
-def get_dojo_from_list_by_name(dojo_list, name):
-    return filter(lambda dojo: dojo["name"] == name, dojo_list)
-
-def get_dojo_url_by_name(name):
-    dojo_list = fetch_dojo_list()
-    required_dojo = get_dojo_url_by_name(dojo_list, name)
-    if any(required_dojo):
-        fetch_dojo(required_dojo[0]["url"])
-        return true
-    else:
-        print "Dojo with name %s is not found" % name
-        return false
-
-def fetch_dojo(url):
-    # fetching dojo by url
-    return 0
-
-if len(sys.argv) == 1:
-    show_dojo_names()
+def list_dojo():
+    print "dojo: list of available dojo"
     sys.exit(0)
-else:
-    is_success = get_dojo_url_by_name(sys.argv[1])
-    sys.exit(0 if is_success else 1)
+
+def list_katas():
+    print "dojo: liast of katas"
+    sys.exit(0)
+
+def open_dojo():
+    print "dojo: it is the dojo you search"
+    sys.exit(0)
+
+def open_kata():
+    print "dojo: use it wisely"
+    sys.exit(0)
+
+def incorrect_command():
+    print "dojo: seems like it's not your dojo"
+    sys.exit(1)
+
+##########################
+
+{
+    "list_dojo" : list_dojo(),
+    "list_katas" : list_katas(),
+    "open" : open_kata()
+}.get(sys.argv[0], incorrect_command())
