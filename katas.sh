@@ -13,7 +13,7 @@ scripts_path="${system_path}/scripts"
 
 dojo_script="${scripts_path}/dojo.py"
 sensei_script="${scripts_path}/sensei.py"
-watchman_script="${scripts_path/watchman.py}"
+watchman_script="${scripts_path}/watchman.py"
 
 base_path="$HOME/katas"
 dojo_path="${base_path}/dojo"
