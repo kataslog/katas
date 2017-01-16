@@ -21,7 +21,7 @@ def incorrect_command():
 #########################
 
 {
-    "hint", hint(sys.argv[1], sys.argv[2], sys.argv[3]),
-    "test", test(sys.argv[1], sys.argv[2]),
-    "test_all", test_all(sys.argv[1])
-}.get(sys.argv[0], incorrect_command())
+    "hint", hint(sys.argv[2], sys.argv[3], sys.argv[4]),
+    "test", test(sys.argv[2], sys.argv[3]),
+    "test_all", test_all(sys.argv[2])
+}.get(sys.argv[1], incorrect_command())

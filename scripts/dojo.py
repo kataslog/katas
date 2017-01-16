@@ -28,4 +28,4 @@ def incorrect_command():
     "list_dojo" : list_dojo(),
     "list_katas" : list_katas(),
     "open" : open_kata()
-}.get(sys.argv[0], incorrect_command())
+}.get(sys.argv[1], incorrect_command())

@@ -28,7 +28,7 @@ def incorrect_command():
 ##############################################
 
 {
-    "update", update(sys.argv[1]),
-    "fetch_dojo", fetch_dojo(sys.argv[1]),
-    "update_dojo", update_dojo(sys.argv[1])
-}.get(sys.argv[0], incorrect_command())
+    "update", update(sys.argv[2]),
+    "fetch_dojo", fetch_dojo(sys.argv[2]),
+    "update_dojo", update_dojo(sys.argv[2])
+}.get(sys.argv[1], incorrect_command())
