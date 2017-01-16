@@ -26,7 +26,8 @@ if [ "$INSTALL_KATAS" = 1 ]; then
         exit 0
     else
         mkdir -p "${system_path}/bin"
-        \curl -sSL -o "$katas_bin_path" https://raw.githubusercontent.com/kataslog/katas/master/katas.sh
+        #\curl -sSL -o "$katas_bin_path" https://raw.githubusercontent.com/kataslog/katas/master/katas.sh
+        cp ./katas.sh "$katas_bin_path"
         chmod +x "${katas_bin_path}"
 
         echo "Running initial setup"
@@ -42,11 +43,33 @@ function usage() {
     me=$(basename $0)
 
     echo "$me commands:"
-    printf "%b" "    list dojo\n"
-    printf "%b" "    list <dojo>\n"
-    printf "%b" "    fetch <dojo>\n"
-    printf "%b" "    hint <dojo> <kata_number> [--all]\n"
-    printf "%b" "    test <dojo> [--number=<kata_number>]\n"
+    printf "%b" "    list dojo                       - show list of available dojo\n"
+    printf "%b" "              [--all] [-a]            * all\n"
+    printf "%b" "          [--fetched] [-f]            * only fetched\n"
+    printf "%b" "\n"
+    printf "%b" "    list <dojo>                     - show list of katas for dojo\n"
+    printf "%b" "                [--version] [-v]      * version of dojo\n"
+    printf "%b" "                    [--all] [-a]      * all\n"
+    printf "%b" "             [--unresolved] [-u]      * unresolved\n"
+    printf "%b" "                   [--done] [-d]      * done\n"
+    printf "%b" "                   [--time] [-t]      * sorting by time resolution\n"
+    printf "%b" "          [--sort=acs/desc]           * sorting direction\n"
+    printf "%b" "             [--level=0..2]           * filter by level\n"
+    printf "%b" "\n"
+    printf "%b" "    default <dojo>                  - use dojo as default for operations list/hint/test/open\n"
+    printf "%b" "\n"
+    printf "%b" "    fetch <dojo>                    - fetch katas for dojo\n"
+    printf "%b" "\n"
+    printf "%b" "    update [<dojo>] [--all] [-a]    - update single dojo or all\n"
+    printf "%b" "\n"
+    printf "%b" "    hint <dojo> <kata>              - dispalay hint for kata (if exists)\n"
+    printf "%b" "                   [--all] [-a]       * all hints for kata\n"
+    printf "%b" "\n"
+    printf "%b" "    test <dojo> [<kata>]            - runt tests for single kata or for all dojo\n"
+    printf "%b" "\n"
+    printf "%b" "    open <dojo> [<kata>]            - open dojo or selected kata\n"
+    printf "%b" "                [--random] [-r]       * random kata from dojo\n"
+    printf "%b" "             [--random=<level>]       * with filtering by level\n"
 }
 
 function create_katas_env_scripts() {
@@ -117,11 +140,52 @@ function dojo_list() {
 }
 
 function dojo_list_known() {
-    echo "knowns"
+    echo "dojo list of knowns"
 }
 
 function dojo_katas_list() {
-    dojo_name="$1"
+    dojo="$1"
+    filter="$2"
+    time="$3"
+    sort="$4"
+    difficulty="$5"
+    echo "katas list ${dojo} ${filter} ${time} ${sort} ${difficulty}"
+}
+
+function dojo_use_default() {
+    dojo="$1"
+    echo "use as default ${dojo}"
+}
+
+function dojo_fetch() {
+    dojo="$1"
+    echo "dojo fetch ${dojo}"
+}
+
+function dojo_update() {
+    dojo="$1"
+    echo "dojo update ${dojo}"
+}
+
+function dojo_hint() {
+    dojo="$1"
+    kata="$2"
+    all="$3"
+    echo "hint ${dojo} ${kata} ${all}"
+}
+
+function dojo_test() {
+    dojo="$1"
+    kata="$2"
+    echo "test ${dojo} ${kata}"
+}
+
+function dojo_open() {
+    dojo="$1"
+    kata="$2"
+    level="$3"
+    random="$4"
+    echo "open ${dojo} ${kata} ${level} ${random}"
 }
 
 function clear() {
@@ -138,8 +202,6 @@ if [ -z "$action" ] ; then
     exit 0
 fi
 
-echo "$action"
-
 if [ ! "$action" = "setup" ] ; then
     validate_install
 elif [ ! "$action" = "instal" -a "$1" = "katas" ] ; then
@@ -149,14 +211,188 @@ fi
 case $action in
     list)
         [[ -z "$1" ]] && usage && exit 1
-        if [ "$1" = "dojo" -a "$2" = "known" ]
-        then
-            dojo_list_known
-        elif [ "$1" = "dojo" ]
-        then
-            dojo_list
+
+        if [[ "$1" = "dojo" ]]; then
+            shift
+            if [[ -z "$1" ]]; then
+                dojo_list_known
+            else
+                case "$1" in
+                    -f|--fetched)
+                        dojo_list_known
+                        ;;
+                    -a|--all)
+                        dojo_list
+                        ;;
+                    *)
+                        usage
+                        exit 1
+                        ;;
+                esac
+            fi
         else
-            dojo_katas_list "$1"
+            dojo="$1"
+            shift
+
+            f_all=0
+            f_done=0
+            f_unresolved=0
+            level=-1
+            time=0
+            sort=0
+
+            while test $# -gt 0; do
+                case "$1" in
+                    --version|-v)
+                        shift
+                        ;;
+                    --all|-a)
+                        f_all=1
+                        shift
+                        ;;
+                    --done|-d)
+                        f_done=1
+                        shift
+                        ;;
+                    --unresolved|-u)
+                        f_unresolved=1
+                        shift
+                        ;;
+                    --time|-t)
+                        time=1
+                        shift
+                        ;;
+                    --sort*)
+                        direction=`echo $1 | sed -e 's/^[^=]*=//g'`
+                        case $direction in
+                            asc)
+                                sort=1
+                                ;;
+                            desc)
+                                sort=-1
+                                ;;
+                            *)
+                                sort=0
+                                ;;
+                        esac
+                        shift
+                        ;;
+                    --level*)
+                        l=`echo $1 | sed -e 's/^[^=]*=//g'`
+                        case $l in
+                            easy|0)
+                                level=0
+                                ;;
+                            medium|1)
+                                level=1
+                                ;;
+                            hard|2)
+                                level=2
+                                ;;
+                            *)
+                                level=-1
+                                ;;
+                        esac
+                        shift
+                        ;;
+                    *)
+                        usage
+                        exit 1
+                        ;;
+                esac
+            done
+
+            ((f_list=f_all+f_done+f_unresolved))
+            if [[ $f_list -gt 1 ]]; then
+                usage
+                exit 1
+            else
+                filter=0
+                if [[ $f_all -ne 0 ]]; then
+                    filter=0
+                fi
+                if [[ $f_done -ne 0 ]]; then
+                    filter=2
+                fi
+                if [[ $f_unresolved -ne 0 ]]; then
+                    filter=1
+                fi
+
+                dojo_katas_list "$dojo" "$filter" "$time" "$sort" "$level"
+            fi
+        fi
+        ;;
+    default)
+        [[ -z "$1" ]] && usage && exit 1
+        dojo_use_default "$1"
+        ;;
+    fetch)
+        [[ -z "$1" ]] && usage && exit 1
+        dojo_fetch "$1"
+        ;;
+    update)
+        [[ -z "$1" ]] && usage && exit 1
+        dojo_update "$1"
+        ;;
+    hint|open|test)
+        [[ -z "$1" ]] && usage && exit 1
+
+        kata=
+        kata_count=0
+        all=
+        level=
+        random=
+        dojo="$1"
+        shift
+
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                -a|--all)
+                    all=1
+                    shift
+                    ;;
+                -r|--random)
+                    random=1
+                    shift
+                    ;;
+                --level*)
+                    l=`echo $1 | sed -e 's/^[^=]*=//g'`
+                    case "$l" in
+                        0|easy)
+                            level=0
+                            ;;
+                        1|medium)
+                            level=1
+                            ;;
+                        2|hard)
+                            level=2
+                            ;;
+                    esac
+                    shift
+                    ;;
+                *)
+                    kata="$1"
+                    ((kata_count++))
+                    shift
+                    ;;
+            esac
+        done
+
+        if [[ $kata_count -gt 1 ]]; then
+            usage
+            echo "katas count"
+            exit 1
+        fi
+
+        if [[ "$action" = "hint" ]]; then
+            [[ -z "$kata" ]] && usage && exit 1
+            dojo_hint "$dojo" "$kata" "$all"
+        elif [[ "$action" = "open" ]]; then
+            [[ -n "$level" ]] && [[ -z "$random" ]] && usage && exit 1
+            [[ -n "$kata" ]] && [[ -n "$random" ]] && usage && exit 1
+            dojo_open "$dojo" "$kata" "$level" "$random"
+        else
+            dojo_test "$dojo" "$kata"
         fi
         ;;
     setup|reinstall)
