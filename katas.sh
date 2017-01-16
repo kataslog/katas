@@ -26,8 +26,7 @@ if [ "$INSTALL_KATAS" = 1 ]; then
         exit 0
     else
         mkdir -p "${system_path}/bin"
-        #\curl -sSL -o "$katas_bin_path" https://raw.githubusercontent.com/kataslog/katas/master/katas.sh
-        cp ./katas.sh "$katas_bin_path"
+        \curl -sSL -o "$katas_bin_path" https://raw.githubusercontent.com/kataslog/katas/master/katas.sh
         chmod +x "${katas_bin_path}"
 
         echo "Running initial setup"
